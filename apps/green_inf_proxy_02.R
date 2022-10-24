@@ -4,17 +4,24 @@ library(shiny)
 library(shinythemes)
 library(leaflet)
 library(leaflet.extras)
-library(rgdal)
+library(sf)
 library(shinyjs)
 library(rgeos)
+library(dplyr)
 
 # Data Source: https://data.cityofnewyork.us/Environment/DEP-Green-Infrastructure/spjh-pz7h
-greenInf.load <- readOGR("https://data.cityofnewyork.us/api/geospatial/spjh-pz7h?method=export&format=GeoJSON")
-cols <- ncol(greenInf.load@data)
-names(greenInf.load@data)[c(cols-1,cols)] <- c("longitude", "latitude")
-boros.load <- readOGR("https://data.cityofnewyork.us/api/geospatial/tqmj-j8zm?method=export&format=GeoJSON")
-# Add Boro centroids to dataframe
-boros.load@data <- cbind(boros.load@data, rgeos::gCentroid(boros.load, byid = TRUE)@coords)
+greenInf.load <- st_read("http://data.cityofnewyork.us/api/geospatial/spjh-pz7h?method=export&format=GeoJSON")
+boros.load <- st_read("http://data.cityofnewyork.us/api/geospatial/tqmj-j8zm?method=export&format=GeoJSON") 
+# Get centroids and prep to join
+boros.cent <- boros.load %>% 
+  st_centroid() %>%  
+  mutate(longitude = sf::st_coordinates(.)[,1],
+         latitude = sf::st_coordinates(.)[,2]) %>%
+  st_set_geometry(NULL)
+# Join centroid column
+boros.load <- boros.load %>%
+  left_join(boros.cent) 
+  
 
 icons <- awesomeIconList(
   MS4 = makeAwesomeIcon(icon = "road", library = "fa", markerColor = "gray"),
@@ -110,13 +117,13 @@ server <- function(input, output) {
        # clearShapes() %>%
        clearGroup(group = "boros") %>%
        addPolygons(popup = ~paste0("<b>", boro_name, "</b>"), group = "boros", layerId = ~boro_code, fill = FALSE, color = "green") %>%
-       setView(lng = boros$x[1], lat = boros$y[1], zoom = 9)
+       flyTo(lng = boros$longitude[1], lat = boros$latitude[1], zoom = 10)
    })
-   output$table <- DT::renderDataTable(greenInfInputs()@data, options = list(scrollX = T))
+   output$table <- DT::renderDataTable(greenInfInputs(), options = list(scrollX = T))
    # Print Inputs
-   observe({
-     print(reactiveValuesToList(input))
-   })
+   # observe({
+   #   print(reactiveValuesToList(input))
+   # })
 }
 
 # Run the application 

@@ -3,15 +3,13 @@ library(shiny)
 library(shinythemes)
 library(leaflet)
 library(leaflet.extras)
-library(rgdal)
+library(sf)
 library(shinyjs)
 library(rgeos)
 
 # Data Source: https://data.cityofnewyork.us/Environment/DEP-Green-Infrastructure/spjh-pz7h
-greenInf.load <- readOGR("https://data.cityofnewyork.us/api/geospatial/spjh-pz7h?method=export&format=GeoJSON")
-boros.load <- readOGR("https://data.cityofnewyork.us/api/geospatial/tqmj-j8zm?method=export&format=GeoJSON")
-# Add Boro centroids to dataframe
-boros.load@data <- cbind(boros.load@data, rgeos::gCentroid(boros.load, byid = TRUE)@coords)
+greenInf.load <- st_read("http://data.cityofnewyork.us/api/geospatial/spjh-pz7h?method=export&format=GeoJSON")
+boros.load <- st_read("http://data.cityofnewyork.us/api/geospatial/tqmj-j8zm?method=export&format=GeoJSON")
 
 icons <- awesomeIconList(
   MS4 = makeAwesomeIcon(icon = "road", library = "fa", markerColor = "gray"),
