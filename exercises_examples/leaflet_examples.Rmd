@@ -79,6 +79,9 @@ leaflet(data = rivers) %>%
 ```
 
 # Points
+```{r}
+
+```
 
 ## Circle Markers
 
