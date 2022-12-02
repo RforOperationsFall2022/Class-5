@@ -85,7 +85,7 @@ server <- function(input, output) {
      greenInf <- greenInfInputs()
      # Data is greenInf
      leafletProxy("leaflet", data = greenInf) %>%
-       # In this case either lines 92 or 93 will work
+       # In this case either lines 89 or 90 will work
        clearMarkers() %>%
        clearGroup(group = "greenInf") %>%
        addAwesomeMarkers(icon = ~icons[sewer_type], popup = ~paste0("<b>", project_na, "</b>: ", sewer_type), group = "greenInf", layerId = ~asset_id)

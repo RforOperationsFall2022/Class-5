@@ -6,7 +6,6 @@ library(leaflet)
 library(leaflet.extras)
 library(sf)
 library(shinyjs)
-library(rgeos)
 library(dplyr)
 
 # Data Source: https://data.cityofnewyork.us/Environment/DEP-Green-Infrastructure/spjh-pz7h
@@ -113,7 +112,7 @@ server <- function(input, output) {
      boros <- boroInputs()
      
      leafletProxy("leaflet", data = boros) %>%
-       # In this case either lines 107 or 108 will work
+       # In this case either lines 116 or 117 will work
        # clearShapes() %>%
        clearGroup(group = "boros") %>%
        addPolygons(popup = ~paste0("<b>", boro_name, "</b>"), group = "boros", layerId = ~boro_code, fill = FALSE, color = "green") %>%
